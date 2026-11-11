@@ -1,0 +1,29 @@
+{
+  "name": "neuralfeed",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/prerender.js",
+    "preview": "vite preview",
+    "news:run": "node pipeline/run.js",
+    "news:dry": "node pipeline/run.js --dry-run",
+    "news:backfill": "node pipeline/backfill.js",
+    "prerender": "node scripts/prerender.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.119.0",
+    "dotenv": "^18.0.10",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-router-dom": "^7.18.5",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@vitejs/plugin-react": "^6.3.0",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
+  }
+}

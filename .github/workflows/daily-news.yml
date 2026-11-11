@@ -1,0 +1,51 @@
+name: Daily AI News
+
+on:
+  schedule:
+    # 06:00, 12:00 and 18:00 IST (00:30, 06:30, 12:30 UTC)
+    - cron: '30 0 * * *'
+    - cron: '30 6 * * *'
+    - cron: '30 12 * * *'
+  workflow_dispatch: {} # "Run workflow" button in the Actions tab
+
+concurrency:
+  group: daily-news
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Fetch, write & publish news
+        run: npm run news:run
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+          TELEGRAM_LANG: ${{ vars.TELEGRAM_LANG || 'en' }}
+          SITE_URL: ${{ vars.SITE_URL }}
+          AI_PROVIDER_ORDER: ${{ vars.AI_PROVIDER_ORDER || 'groq,gemini,openrouter,cerebras,mistral' }}
+          MAX_ARTICLES_PER_RUN: ${{ vars.MAX_ARTICLES_PER_RUN || '20' }}
+          ENABLE_HINDI: ${{ vars.ENABLE_HINDI || 'true' }}
+
+      # Rebuild the website so new articles get SEO pages + sitemap/RSS entries.
+      - name: Trigger Vercel rebuild
+        if: success()
+        env:
+          HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$HOOK" ]; then curl -fsS -X POST "$HOOK" > /dev/null && echo "Vercel rebuild triggered"; else echo "VERCEL_DEPLOY_HOOK_URL not set — skipping"; fi
