@@ -9,6 +9,7 @@ import ForYouPage from './pages/ForYouPage.jsx'
 import SavedPage from './pages/SavedPage.jsx'
 import ModelsPage from './pages/ModelsPage.jsx'
 import AskPage from './pages/AskPage.jsx'
+import ShortsPage from './pages/ShortsPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="saved" element={<SavedPage />} />
         <Route path="models" element={<ModelsPage />} />
         <Route path="ask" element={<AskPage />} />
+        <Route path="shorts" element={<ShortsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

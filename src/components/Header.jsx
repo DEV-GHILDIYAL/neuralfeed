@@ -5,7 +5,7 @@ import { parseDayKey, toDayKey } from '../lib/dates.js'
 import { useLang } from '../lib/i18n.jsx'
 import { useBookmarks } from '../lib/local.js'
 import Calendar from './Calendar.jsx'
-import { BookmarkIcon, CalendarIcon, ChatIcon, CpuIcon, MoonIcon, SearchIcon, StarIcon, SunIcon } from './Icons.jsx'
+import { BoltIcon, BookmarkIcon, CalendarIcon, ChatIcon, CpuIcon, MoonIcon, SearchIcon, StarIcon, SunIcon } from './Icons.jsx'
 
 function useTheme() {
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
@@ -92,10 +92,10 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/80 backdrop-blur-xl dark:border-white/[0.07] dark:bg-[#0a0d14]/80">
-      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 pt-3 sm:px-6">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5">
-          <img src="/favicon.svg" alt="" className="h-8 w-8" />
-          <span className="font-display text-xl font-bold tracking-tight">
+      <div className="mx-auto flex max-w-7xl items-center gap-2 px-3 pt-3 sm:gap-3 sm:px-6">
+        <Link to="/" className="flex min-w-0 shrink-0 items-center gap-2 sm:gap-2.5">
+          <img src="/favicon.svg" alt="" className="h-7 w-7 sm:h-8 sm:w-8" />
+          <span className="font-display text-lg font-bold tracking-tight sm:text-xl">
             Neural<span className="text-indigo-600 dark:text-indigo-400">Feed</span>
           </span>
         </Link>
@@ -111,7 +111,7 @@ export default function Header() {
           />
         </form>
 
-        <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
+        <div className="ml-auto flex items-center gap-1 sm:gap-1.5 lg:ml-0">
           <button onClick={() => navigate('/search')} aria-label="Search" className={`${iconBtn} lg:hidden`}>
             <SearchIcon className="h-5 w-5" />
           </button>
@@ -131,7 +131,7 @@ export default function Header() {
               </span>
             )}
           </Link>
-          <button onClick={() => setDark(!dark)} aria-label="Toggle dark mode" className={iconBtn}>
+          <button onClick={() => setDark(!dark)} aria-label="Toggle dark mode" className={`${iconBtn} hidden sm:grid`}>
             {dark ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
           </button>
         </div>
@@ -140,6 +140,10 @@ export default function Header() {
       <nav className="no-scrollbar mx-auto flex max-w-7xl overflow-x-auto px-2 sm:px-3">
         <NavLink to="/" end className={navClass}>
           {t('topStories')}
+        </NavLink>
+        <NavLink to="/shorts" className={navClass}>
+          <BoltIcon className="h-3.5 w-3.5 text-amber-500" />
+          {t('shorts')}
         </NavLink>
         <NavLink to="/for-you" className={navClass}>
           <StarIcon className="h-3.5 w-3.5" />

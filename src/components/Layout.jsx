@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from '../lib/supabase.js'
 
 export default function Layout() {
   const { pathname } = useLocation()
+  const fullScreen = pathname === '/shorts' // shorts fill the viewport: no padding, no footer
   // Braces matter: in newer Chrome, scrollTo() returns a Promise, and returning it
   // from useEffect makes React treat it as a cleanup function → "destroy is not a function".
   useEffect(() => {
@@ -21,10 +22,10 @@ export default function Layout() {
           <code className="font-mono">VITE_SUPABASE_ANON_KEY</code> to <code className="font-mono">.env</code> for live news.
         </div>
       )}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
+      <main className={fullScreen ? 'w-full flex-1' : 'mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-8'}>
         <Outlet />
       </main>
-      <Footer />
+      {!fullScreen && <Footer />}
     </div>
   )
 }

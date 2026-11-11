@@ -11,6 +11,8 @@ Daily **AI & tech news** website where AI writes the briefs — automatically, i
 
 | | |
 |---|---|
+| ⚡ Shorts | `/shorts` — swipe-through news cards (summary + key points), keyboard ↑↓ on desktop |
+| 📱 Mobile app | React Native (Expo) app in `mobile/` — see [mobile/README.md](mobile/README.md) |
 | 📰 Auto news | Real tech/AI stories from 21 RSS feeds → AI rewrites them as neutral briefs with key points; off-topic stories are rejected |
 | 🧬 Story clustering | Embeddings detect when several outlets cover the same story → one article + "Also covered by" list |
 | 🇮🇳 Hindi | Every article is translated; one-click EN/हिं switch for the whole UI |
@@ -90,6 +92,7 @@ The workflow runs at 06:00 / 12:00 / 18:00 IST, or manually from the **Actions**
 
 ## Project structure
 ```
+mobile/              React Native (Expo) app — Home, Shorts, Ask AI, Saved, archive, model tracker
 api/ask.js           Ask NeuralFeed endpoint (Vercel function; served by Vite plugin in dev)
 src/                 React app
   pages/             Home, Category, Article, Date, Search, For You, Saved, Models, Ask

@@ -123,6 +123,7 @@ async function main() {
 
   // Static pages
   const statics = [
+    ['/shorts', 'Shorts', 'AI & tech news in 60 seconds — swipe through today’s stories.'],
     ['/models', 'AI Model Tracker', 'Every new AI model launch spotted in the news — LLMs, open-weight models, image, video and code models.'],
     ['/ask', 'Ask NeuralFeed', 'Ask questions about recent AI & tech news and get answers with sources.'],
     ['/for-you', 'For You', DEFAULT_DESC],

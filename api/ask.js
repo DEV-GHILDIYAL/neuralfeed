@@ -43,6 +43,15 @@ Answer the user's question using ONLY the numbered news articles provided. Rules
 - ${lang === 'hi' ? 'Reply in simple Hindi (Devanagari); keep company/product/model names in English.' : 'Reply in English.'}`
 
 export default async function handler(req, res) {
+  // CORS: the mobile app's web build and other front-ends call this from another origin.
+  // Native iOS/Android fetch ignores CORS. The endpoint is public and rate-limited anyway.
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  if (req.method === 'OPTIONS') {
+    res.statusCode = 204
+    return res.end()
+  }
   if (req.method !== 'POST') return send(res, 405, { error: 'Use POST' })
 
   const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'local').split(',')[0].trim()

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import ArticleCard, { CardSkeleton, LeadCard, RowCard } from '../components/ArticleCard.jsx'
 import { CATEGORY_DOT } from '../components/CategoryBadge.jsx'
 import Sidebar from '../components/Sidebar.jsx'
-import { ArrowRight } from '../components/Icons.jsx'
+import { ArrowRight, BoltIcon } from '../components/Icons.jsx'
 import { getArticles } from '../lib/api.js'
 import { CATEGORIES, categoryLabel } from '../lib/categories.js'
 import { toDayKey } from '../lib/dates.js'
@@ -80,12 +80,20 @@ export default function HomePage() {
             {new Date().toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' })}
           </h1>
         </div>
+        <div className="flex flex-wrap gap-2">
+        <Link
+          to="/shorts"
+          className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-orange-500/20 hover:brightness-110"
+        >
+          <BoltIcon className="h-4 w-4" /> {t('shorts')}
+        </Link>
         <Link
           to={`/date/${toDayKey()}`}
           className="group flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium hover:border-indigo-500 hover:text-indigo-600 dark:border-white/10 dark:bg-white/5 dark:hover:border-indigo-400 dark:hover:text-indigo-300"
         >
           {t('allTodaysStories')} <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
         </Link>
+        </div>
       </div>
 
       {/* Lead + top headlines */}

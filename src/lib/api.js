@@ -51,6 +51,24 @@ export async function getArticles({ category, categories, search, tag, from, to,
   return { data: data.slice(0, pageSize), hasMore: data.length > pageSize }
 }
 
+/** Shorts feed: list columns + key points (EN/HI), newest first. */
+export async function getShorts({ page = 0, pageSize = 15, category } = {}) {
+  const start = page * pageSize
+  if (!isSupabaseConfigured) {
+    const rows = mockFilter({ category })
+    return { data: rows.slice(start, start + pageSize), hasMore: rows.length > start + pageSize }
+  }
+  let query = supabase
+    .from('articles')
+    .select(`${LIST_COLUMNS}, key_points, key_points_hi, source_url`)
+    .order('published_at', { ascending: false })
+    .range(start, start + pageSize)
+  if (category) query = query.eq('category', category)
+  const { data, error } = await query
+  if (error) throw error
+  return { data: data.slice(0, pageSize), hasMore: data.length > pageSize }
+}
+
 /** Articles by id, returned in the same order as `ids` (used for bookmarks). */
 export async function getArticlesByIds(ids) {
   if (!ids.length) return []

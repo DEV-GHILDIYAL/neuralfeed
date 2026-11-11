@@ -4,6 +4,13 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 const STRINGS = {
   en: {
     topStories: 'Top Stories',
+    shorts: 'Shorts',
+    shortsHint: 'Swipe or use ↑ ↓ keys',
+    readFull: 'Full story',
+    share: 'Share',
+    allCaughtUp: "You're all caught up!",
+    allCaughtUpSub: 'New shorts arrive 3 times a day.',
+    backToTop: 'Back to top',
     today: 'Today',
     forYou: 'For You',
     saved: 'Saved',
@@ -88,6 +95,13 @@ const STRINGS = {
   },
   hi: {
     topStories: 'मुख्य खबरें',
+    shorts: 'शॉर्ट्स',
+    shortsHint: 'स्वाइप करें या ↑ ↓ दबाएं',
+    readFull: 'पूरी खबर',
+    share: 'शेयर',
+    allCaughtUp: 'आपने सब पढ़ लिया!',
+    allCaughtUpSub: 'नए शॉर्ट्स दिन में 3 बार आते हैं।',
+    backToTop: 'ऊपर जाएं',
     today: 'आज',
     forYou: 'आपके लिए',
     saved: 'सेव की गई',

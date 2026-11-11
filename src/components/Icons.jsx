@@ -128,3 +128,26 @@ export const ChatIcon = (p) => (
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
 )
+export const BoltIcon = (p) => (
+  <svg {...base} {...p}>
+    <path d="M13 2 3 14h9l-1 8 10-12h-9z" />
+  </svg>
+)
+export const ShareIcon = (p) => (
+  <svg {...base} {...p}>
+    <circle cx="18" cy="5" r="3" />
+    <circle cx="6" cy="12" r="3" />
+    <circle cx="18" cy="19" r="3" />
+    <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" />
+  </svg>
+)
+export const ChevronUp = (p) => (
+  <svg {...base} {...p}>
+    <path d="m18 15-6-6-6 6" />
+  </svg>
+)
+export const ChevronDown = (p) => (
+  <svg {...base} {...p}>
+    <path d="m6 9 6 6 6-6" />
+  </svg>
+)
