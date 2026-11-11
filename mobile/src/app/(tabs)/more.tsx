@@ -7,6 +7,8 @@ import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Card, Chip, Screen, T } from '@/components/ui'
+import { useUpdates } from '@/components/update-prompt'
+import { RELEASES_URL } from '@/lib/updates'
 import { useApp } from '@/lib/app-state'
 import { CATEGORIES, categoryLabel } from '@/lib/categories'
 import { toDayKey } from '@/lib/dates'
@@ -54,6 +56,16 @@ export default function MoreScreen() {
   const { t, lang, setLang, theme, setTheme, topics, setTopics, colors } = useApp()
   const toggleTopic = (slug: string) => setTopics(topics.includes(slug) ? topics.filter((s) => s !== slug) : [...topics, slug])
   const go = (href: Href) => router.push(href)
+  const updates = useUpdates()
+  const hi = lang === 'hi'
+  const updateSub =
+    updates.phase === 'checking'
+      ? hi ? 'चेक कर रहे हैं…' : 'Checking…'
+      : updates.phase === 'uptodate'
+        ? `v${updates.version} · ${hi ? 'आप लेटेस्ट वर्ज़न पर हैं ✓' : "You're up to date ✓"}`
+        : updates.phase === 'error'
+          ? hi ? 'चेक नहीं हो सका — फिर कोशिश करें' : "Couldn't check — try again"
+          : `v${updates.version} · ${hi ? 'अपडेट चेक करें' : 'Check for updates'}`
 
   return (
     <Screen>
@@ -109,6 +121,13 @@ export default function MoreScreen() {
 
         <Card style={{ paddingHorizontal: space.lg, paddingVertical: space.sm }}>
           <Row icon="paper-plane" color="#229ED9" title={t('telegram')} sub={t('telegramSub')} onPress={() => Linking.openURL(TELEGRAM_URL)} />
+          <Row
+            icon="cloud-download-outline"
+            color="#f59e0b"
+            title={hi ? 'ऐप अपडेट' : 'App updates'}
+            sub={updateSub}
+            onPress={() => (updates.supported ? updates.checkNow() : WebBrowser.openBrowserAsync(RELEASES_URL))}
+          />
           <Row icon="globe-outline" color="#10b981" title={t('website')} sub={SITE_URL.replace('https://', '')} onPress={() => WebBrowser.openBrowserAsync(SITE_URL)} />
         </Card>
 

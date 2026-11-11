@@ -3,6 +3,7 @@ import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
 
+import { UpdateProvider } from '@/components/update-prompt'
 import { AppStateProvider, useApp } from '@/lib/app-state'
 
 SplashScreen.preventAutoHideAsync()
@@ -24,6 +25,7 @@ function RootStack() {
 
   return (
     <ThemeProvider value={navTheme}>
+      <UpdateProvider>
       <StatusBar style={dark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
@@ -41,6 +43,7 @@ function RootStack() {
         <Stack.Screen name="models" options={{ title: '' }} />
         <Stack.Screen name="search" options={{ title: '' }} />
       </Stack>
+      </UpdateProvider>
     </ThemeProvider>
   )
 }

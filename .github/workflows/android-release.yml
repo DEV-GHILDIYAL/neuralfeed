@@ -1,0 +1,131 @@
+name: Android APK Release
+
+# Publish a new app version:
+#   git tag -a v1.0.1 -m "What's new: ..."   &&   git push origin v1.0.1
+# The tag message becomes the release notes, which the app shows in its "New update available" popup.
+# (Or: Actions tab → "Android APK Release" → Run workflow, once this file is on the default branch.)
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version, e.g. 1.0.1'
+        required: true
+      notes:
+        description: "What's new (shown in the app's update popup)"
+        required: false
+
+permissions:
+  contents: write # create the GitHub Release
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # needed to read the annotated tag message
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Resolve version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          INPUT_NOTES: ${{ github.event.inputs.notes }}
+        run: |
+          if [ -n "$INPUT_VERSION" ]; then VERSION="${INPUT_VERSION#v}"; else VERSION="${GITHUB_REF_NAME#v}"; fi
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "::error::Version must look like 1.2.3 (got '$VERSION')"; exit 1; fi
+          IFS=. read -r MAJ MIN PAT <<< "$VERSION"
+          CODE=$((MAJ * 10000 + MIN * 100 + PAT))   # 1.2.3 -> 10203; must always increase
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$CODE" >> "$GITHUB_ENV"
+          # release notes: workflow input, else the annotated tag message
+          if [ -n "$INPUT_NOTES" ]; then NOTES="$INPUT_NOTES"; else NOTES="$(git tag -l --format='%(contents)' "v$VERSION" 2>/dev/null)"; fi
+          [ -z "$NOTES" ] && NOTES="Bug fixes and improvements."
+          printf '%s\n' "$NOTES" > "$RUNNER_TEMP/notes.md"
+          echo "Building v$VERSION (versionCode $CODE)"
+
+      - name: Set app version
+        run: |
+          node -e "
+            const fs = require('fs');
+            const a = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+            a.expo.version = process.env.VERSION;
+            a.expo.android.versionCode = Number(process.env.VERSION_CODE);
+            fs.writeFileSync('app.json', JSON.stringify(a, null, 2));
+          "
+
+      - name: Write app config (.env)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ vars.SUPABASE_ANON_KEY }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::Add secret SUPABASE_URL and variable SUPABASE_ANON_KEY (Settings → Secrets and variables → Actions)"; exit 1
+          fi
+          {
+            echo "EXPO_PUBLIC_SUPABASE_URL=$SUPABASE_URL"
+            echo "EXPO_PUBLIC_SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY"
+            echo "EXPO_PUBLIC_SITE_URL=${SITE_URL:-https://ourneuralfeed.vercel.app}"
+          } > .env
+
+      - run: npm ci
+
+      - name: Expo prebuild (generate android/)
+        run: npx expo prebuild --platform android --no-install --clean
+
+      - name: Restore signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "::error::Secret ANDROID_KEYSTORE_BASE64 is missing"; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
+
+      - name: Build release APK
+        working-directory: mobile/android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon \
+            -PreactNativeArchitectures=arm64-v8a,armeabi-v7a \
+            -Pandroid.injected.signing.store.file="$RUNNER_TEMP/release.keystore" \
+            -Pandroid.injected.signing.store.password="$KEYSTORE_PASSWORD" \
+            -Pandroid.injected.signing.key.alias=neuralfeed \
+            -Pandroid.injected.signing.key.password="$KEYSTORE_PASSWORD"
+          APK="app/build/outputs/apk/release/app-release.apk"
+          test -f "$APK"
+          # confirm it is signed with OUR key (not the debug key) — updates fail otherwise
+          APKSIGNER="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner"
+          "$APKSIGNER" verify --print-certs "$APK" | tee "$RUNNER_TEMP/certs.txt" | head -3
+          grep -q "CN=NeuralFeed" "$RUNNER_TEMP/certs.txt" || { echo "::error::APK is not signed with the NeuralFeed release key"; exit 1; }
+          cp "$APK" "$RUNNER_TEMP/NeuralFeed-v$VERSION.apk"
+          ls -la "$RUNNER_TEMP/NeuralFeed-v$VERSION.apk"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: NeuralFeed v${{ env.VERSION }}
+          body_path: ${{ runner.temp }}/notes.md
+          files: ${{ runner.temp }}/NeuralFeed-v${{ env.VERSION }}.apk
+          make_latest: true
