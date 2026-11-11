@@ -33,5 +33,7 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   return {
     plugins: [react(), tailwindcss(), apiDevServer(env)],
+    // NEXT_PUBLIC_* = public vars created by the Vercel Supabase integration (URL + anon key only)
+    envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
   }
 })

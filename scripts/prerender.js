@@ -79,7 +79,11 @@ function articleBody(a) {
 
 async function fetchArticles() {
   const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL
-  const key = process.env.VITE_SUPABASE_ANON_KEY
+  const key =
+    process.env.VITE_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.SUPABASE_PUBLISHABLE_KEY
   if (!url || !key) {
     console.warn('⚠ prerender: Supabase env not set — writing static routes only')
     return []
