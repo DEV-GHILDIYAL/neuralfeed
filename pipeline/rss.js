@@ -30,6 +30,9 @@ export function stripHtml(html = '') {
     .trim()
 }
 
+// Image URLs from RSS/HTML attributes often still contain "&amp;" — decode before storing.
+const decodeUrlEntities = (u) => u.replace(/&amp;/g, '&').replace(/&#0?38;/g, '&').trim()
+
 function pickImage(item) {
   const fromMedia = (arr) => arr?.map((m) => m?.$?.url).find(Boolean)
   const candidates = [
@@ -39,7 +42,8 @@ function pickImage(item) {
     item.enclosure?.url && /\.(jpe?g|png|webp)/i.test(item.enclosure.url) ? item.enclosure.url : undefined,
     (item.contentEncoded || item.content || '').match(/<img[^>]+src=["']([^"']+)["']/i)?.[1],
   ]
-  return candidates.find((u) => u && /^https?:\/\//.test(u)) ?? null
+  const url = candidates.find((u) => u && /^https?:\/\//.test(u))
+  return url ? decodeUrlEntities(url) : null
 }
 
 /** Fetch one feed → normalized items. Never throws; returns [] on failure. */
@@ -102,7 +106,7 @@ export async function enrichItem(item, { minChars = 600 } = {}) {
     return {
       ...item,
       text: body.length > item.text.length ? body : item.text,
-      image: item.image || (ogImage?.startsWith('http') ? ogImage : null),
+      image: item.image || (ogImage?.startsWith('http') ? decodeUrlEntities(ogImage) : null),
     }
   } catch {
     return item
